@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: my_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: mein_user
+      POSTGRES_PASSWORD: mein_passwort
+      POSTGRES_DB: meine_datenbank
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgweb:
+    image: sosedoff/pgweb:latest
+    container_name: my_pgweb
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=postgres://mein_user:mein_passwort@postgres_db:5432/meine_datenbank?sslmode=disable
+    depends_on:
+      - postgres_db
+
+  react_frontend:
+    image: node:20-alpine
+    container_name: my_react_frontend
+    restart: always
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - WATCHPACK_POLLING=true
+    command: sh -c "npm install && npm run dev -- --host"
+
+volumes:
+  postgres_data:
+  pgadmin_data:
