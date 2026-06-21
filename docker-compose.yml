@@ -6,9 +6,9 @@ services:
     container_name: my_postgres
     restart: always
     environment:
-      POSTGRES_USER: mein_user
-      POSTGRES_PASSWORD: mein_passwort
-      POSTGRES_DB: meine_datenbank
+      POSTGRES_USER: ttt_user
+      POSTGRES_PASSWORD: ttt_password
+      POSTGRES_DB: ttt_db
     ports:
       - "5432:5432"
     volumes:
@@ -21,7 +21,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - DATABASE_URL=postgres://mein_user:mein_passwort@postgres_db:5432/meine_datenbank?sslmode=disable
+      - DATABASE_URL=postgres://ttt_user:ttt_password@postgres_db:5432/ttt_db?sslmode=disable
     depends_on:
       - postgres_db
 
@@ -38,6 +38,23 @@ services:
     environment:
       - WATCHPACK_POLLING=true
     command: sh -c "npm install && npm run dev -- --host"
+
+  spring_backend:
+    image: maven:3.9-eclipse-temurin-17-alpine
+    container_name: my_spring_backend
+    restart: always
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+      - ~/.m2:/root/.m2
+    # --- HIER DIE RELEVANTEN UMGEBUNGSVARIABLEN ---
+    environment:
+      - MAVEN_OPTS=-Djava.security.egd=file:/dev/./urandom
+    command: mvn spring-boot:run
+    depends_on:
+      - postgres_db
 
 volumes:
   postgres_data:
